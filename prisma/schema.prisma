@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Responden {
+  id          String    @id @default(cuid())
+  nama        String
+  email       String    @unique
+  noTelp      String?
+  divisi      String
+  shadowToken String    @unique
+  status      String    @default("Belum Dikirim") // Belum Dikirim | Terkirim | Sudah Isi
+  submittedAt DateTime?
+  nomorUrut   Int?
+  createdAt   DateTime  @default(now())
+
+  jawaban Jawaban[]
+  reward  Reward[]
+}
+
+model Kuesioner {
+  id          String   @id @default(cuid())
+  judul       String
+  deskripsi   String?
+  isPublished Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  pertanyaan Pertanyaan[]
+}
+
+model Pertanyaan {
+  id          String   @id @default(cuid())
+  kuesionerId String
+  urutan      Int
+  teks        String
+  tipe        String   // skala | pilihan_ganda | checkbox | long_text | short_text
+  required    Boolean  @default(false)
+  options     Json?    // untuk tipe skala: {min, max, labelKiri, labelKanan} | pilihan_ganda/checkbox: [string]
+  createdAt   DateTime @default(now())
+
+  kuesioner Kuesioner @relation(fields: [kuesionerId], references: [id], onDelete: Cascade)
+  jawaban   Jawaban[]
+}
+
+model Jawaban {
+  id           String   @id @default(cuid())
+  respondenId  String
+  pertanyaanId String
+  nilaiTeks    String?
+  nilaiJson    Json?    // untuk checkbox (multiple values)
+  createdAt    DateTime @default(now())
+
+  responden  Responden  @relation(fields: [respondenId], references: [id], onDelete: Cascade)
+  pertanyaan Pertanyaan @relation(fields: [pertanyaanId], references: [id], onDelete: Cascade)
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  respondenId String
+  tanggalSpin DateTime @default(now())
+  statusEmail String   @default("Belum") // Belum | Terkirim
+  createdAt   DateTime @default(now())
+
+  responden Responden @relation(fields: [respondenId], references: [id])
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
