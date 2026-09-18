@@ -83,7 +83,7 @@ export async function POST() {
     const existingWinners = await prisma.reward.findMany({
       select: { respondenId: true },
     });
-    const winnerIds = existingWinners.map((w) => w.respondenId);
+    const winnerIds = existingWinners.map((w: { respondenId: string }) => w.respondenId);
 
     // Get all submitted responden, exclude yang sudah pernah menang
     const submitted = await prisma.responden.findMany({

@@ -37,7 +37,7 @@ export async function GET() {
     const existingWinners = await prisma.reward.findMany({
       select: { respondenId: true },
     });
-    const winnerIds = existingWinners.map((w) => w.respondenId);
+    const winnerIds = existingWinners.map((w: { respondenId: string }) => w.respondenId);
 
     const hasil = await prisma.responden.findMany({
       where: {
